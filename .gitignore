@@ -1,0 +1,13 @@
+__*__
+.Python
+*.pyc
+bin/
+lib/
+*.swp
+pip-selfcheck.json
+share/
+twisted/
+include/
+
+
+
