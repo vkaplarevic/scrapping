@@ -20,7 +20,6 @@ def main():
     values = [x for x in author_replies.keys() if author_replies[x] > 0]
     
     comments_per_hour = stats.comments_per_hour()
-    print(comments_per_hour)
     times = [x for x in comments_per_hour]
     data = [
         go.Bar(
