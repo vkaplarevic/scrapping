@@ -23,7 +23,7 @@ def create_barchart_per_hour(link):
         ),
     ]
 
-    plot_url = py.plot(data, filename='comments-per-time')
+    plot_url = py.plot(data, filename='comments-per-time-' + link.replace("/", "_") )
     print("You can find you graph here: " + plot_url)
 
 

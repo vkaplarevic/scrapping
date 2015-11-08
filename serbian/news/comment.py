@@ -6,8 +6,10 @@ Simple class encapsulating comment on various internet sites.
 
 MAX_WORDS_PER_COMMENT = 7
 
+
 def _num_format(num):
     return "0" + str(num) if num < 10 else str(num)
+
 
 def _round_time(st_raw):
     date_str = str(st_raw.tm_year) + "-" + _num_format(st_raw.tm_mon) + "-" + _num_format(st_raw.tm_mday) + " " + _num_format(st_raw.tm_hour) + ":00" 
@@ -65,6 +67,8 @@ class Comment(object):
 
         s = self.author + "<br><br>"
         s += "<i>" + "<br>".join([ " ".join(line)  for line in lines]) + "</i>"
+        s += "pluses: " + str(self.pluses) + "<br>"
+        s += "minuses: " + str(self.minuses) + "<br>"
         return s
 
 
