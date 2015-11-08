@@ -4,6 +4,8 @@ import datetime
 Simple class encapsulating comment on various internet sites.
 """
 
+MAX_WORDS_PER_COMMENT = 7
+
 def _num_format(num):
     return "0" + str(num) if num < 10 else str(num)
 
@@ -50,6 +52,20 @@ class Comment(object):
     def formatted_time(self):
         return time.strftime("%a, %d %b %Y %H:%M:%S", self.time) + "\n"
 
+
+    def html(self):
+        # Limit the text here...
+        words = self.text.split(" ")
+        lines = [[]]
+        for word in words:
+            if len(lines[-1]) <= MAX_WORDS_PER_COMMENT:
+                lines[-1].append(word)
+            else:
+                lines.append([word])
+
+        s = self.author + "<br><br>"
+        s += "<i>" + "<br>".join([ " ".join(line)  for line in lines]) + "</i>"
+        return s
 
 
 class CommentStats:
@@ -99,6 +115,10 @@ class CommentStats:
                 key=lambda c: self.comment_ids[c].time
         )
 
+        self.__comments_per_hour()
+        self.__higest_rated_comment_per_hour()
+
+
     def __str__(self):
         res = "Statistics:\n"
         res += "* Article date: " + time.strftime("%a, %d %b %Y %H:%M:%S", self.article_date) + "\n"
@@ -108,11 +128,13 @@ class CommentStats:
         res += "* Comment with most minuses:\n" + str(self.max_minuses_comment) + "\n"
         return res
 
-    def comments_per_hour(self):
+
+    def __comments_per_hour(self):
         st = _round_time(self.comment_ids[self.comments_chronologically[0]].time)
         et = _round_time(self.comment_ids[self.comments_chronologically[-1]].time)
         time = _round_time(self.comment_ids[self.comments_chronologically[0]].time)
         ranges = {}
+
         while time <= et:
             ranges[time] = []
             time = time + datetime.timedelta(hours=1)
@@ -122,5 +144,22 @@ class CommentStats:
             rounded = _round_time(self.comment_ids[cid].time)
             ranges[rounded].append(cid)
 
-        return {x: len(ranges[x]) for x in ranges}
+        self.comments_per_hour = ranges
+
+
+    def __higest_rated_comment_per_hour(self):
+        comments_per_hour = self.comments_per_hour
+        self.highest_rated_comment_per_hour = {}
+ 
+        for hour in self.comments_per_hour:
+            if (len(comments_per_hour[hour]) == 0):
+                self.highest_rated_comment_per_hour[hour] = ""
+                continue
+
+            self.highest_rated_comment_per_hour[hour] = self.comment_ids[
+                max(comments_per_hour[hour], key=lambda x: self.comment_ids[x].pluses)
+            ].html()
+
+
+
 
