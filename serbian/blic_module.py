@@ -1,6 +1,6 @@
 import urllib.request
 from bs4 import BeautifulSoup
-import comment
+import news.comment
 
 def parse_comments(link):
     site = urllib.request.urlopen(link + "/komentari#ostali");
@@ -22,7 +22,7 @@ def parse_comments(link):
             continue
         parent_graph[comm.parent_id].append(comm.unique_id)
 
-    return comment.CommentStats(comments, parent_graph)
+    return news.comment.CommentStats(comments, parent_graph)
 
 
 def __read_parents(comment_box):
@@ -56,7 +56,7 @@ def __parse_one_comment(comment_box):
     p_unique_id = comment_box.get("db_id")
     p_parent_id = __read_parents(comment_box)
 
-    ic = comment.Comment(text=p_text, author=p_author, pluses=p_pluses_count, minuses=p_minuses_count, unique_id=p_unique_id)
+    ic = news.comment.Comment(text=p_text, author=p_author, pluses=p_pluses_count, minuses=p_minuses_count, unique_id=p_unique_id)
     if p_parent_id is not None:
         ic.parent_id = p_parent_id
 
