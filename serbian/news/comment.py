@@ -66,7 +66,7 @@ class Comment(object):
                 lines.append([word])
 
         s = self.author + "<br><br>"
-        s += "<i>" + "<br>".join([ " ".join(line)  for line in lines]) + "</i>"
+        s += "<i>" + "<br>".join([ " ".join(line)  for line in lines]) + "</i><br><br>"
         s += "pluses: " + str(self.pluses) + "<br>"
         s += "minuses: " + str(self.minuses) + "<br>"
         return s
