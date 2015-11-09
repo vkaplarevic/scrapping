@@ -76,7 +76,7 @@ class CommentStats:
     """
     Basic stats about the comments on one page.
     """
-    def __init__(self, comment_ids, comment_graph, article_date):
+    def __init__(self, comment_ids, comment_graph, article_date=None):
         """
         comment_ids: dictionary of ids mapping to comment object,
         comment_graph: graph mapping the comment id to its children
@@ -125,7 +125,8 @@ class CommentStats:
 
     def __str__(self):
         res = "Statistics:\n"
-        res += "* Article date: " + time.strftime("%a, %d %b %Y %H:%M:%S", self.article_date) + "\n"
+        if self.article_date:
+            res += "* Article date: " + time.strftime("%a, %d %b %Y %H:%M:%S", self.article_date) + "\n"
         res += "* Total number of comments: " + str(self.total_count) + "\n"
         res += "* Comment with most replies:\n" + str(self.max_replies_comment) + "\n"
         res += "* Comment with most pluses:\n" + str(self.max_pluses_comment) + "\n"
