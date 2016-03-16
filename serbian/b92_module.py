@@ -1,10 +1,7 @@
 import urllib.request
 from bs4 import BeautifulSoup
-import news.comment
 import time
 import urllib
-
-
 
 SERBIAN_MONTHS = {
     'januar':   '01',
@@ -22,6 +19,11 @@ SERBIAN_MONTHS = {
 }
 
 
+def __as_2_digit(num):
+    if num < 10:
+        return "0" + str(num)
+    return str(num)
+   
 
 def __parse_date(raw):
     which = None
@@ -31,7 +33,18 @@ def __parse_date(raw):
             break
 
     time_str = raw.replace(which, SERBIAN_MONTHS[which] + ".")
-    return time.strptime(time_str, "%d. %m. %Y %H:%M")
+    td = time.strptime(time_str, "%d. %m. %Y %H:%M")
+    return (
+        str(td.tm_year) + "-" 
+        + __as_2_digit(td.tm_mon) 
+        + "-" + __as_2_digit(td.tm_mday)
+        + " " + __as_2_digit(td.tm_hour) 
+        + ":" + __as_2_digit(td.tm_min)
+    ) 
+
+
+
+
 
 def __get_comments_link(link):
     url_args = urllib.parse.urlparse(link)
@@ -45,20 +58,21 @@ def __extract_number(raw):
     return int("".join([x for x in list(raw) if x.isdigit()]))
    
 def __parse_one_comment(el):
-    p_unique_id = el.get('id')
-    p_text = el.text
-    p_author = el.findAll("span", class_="comment-author")[0].text
-    p_time = __parse_date(el.findAll("span", class_="comment-date")[0].text) 
+    result = {}
+
+    result["id"] = el.get('id')
+    result["text"] = el.text
+    result["author"] = el.findAll("span", class_="comment-author")[0].text
+    result["date"] = __parse_date(el.findAll("span", class_="comment-date")[0].text) 
     
     pluses_raw = el.findAll("a", class_="rate-up")[0].findAll("span")[0].text
-    p_pluses = __extract_number(pluses_raw)
+    result["pluses"] = __extract_number(pluses_raw)
     
     minuses_raw = el.findAll("a", class_="rate-up")[0].findAll("span")[0].text
-    p_minuses = __extract_number(minuses_raw)
+    result["minuses"] = __extract_number(minuses_raw)
 
-    ic = news.comment.Comment(text=p_text, author=p_author, pluses=p_pluses, minuses=p_minuses, unique_id=p_unique_id, time = p_time)
+    return result
 
-    return ic
 
 def parse_comments(link):
     url = __get_comments_link(link) 
@@ -68,22 +82,15 @@ def parse_comments(link):
   
     comments_box_wrapper = soup.findAll("div", id="tab-comments-h-tab") 
     comments_ol = comments_box_wrapper[0].findAll("ol")
-    comments = {}
+    comments = []
+
     for li in comments_ol[0].findAll("li"):
         ic = __parse_one_comment(li)
         if not ic:
             continue
-        comments[ic.unique_id] = ic
+        comments.append(ic)
 
-
-    parent_graph = {c: [] for c in comments}
-    for cid in comments:
-        comm = comments[cid]
-        if not comm.parent_id:
-            continue
-        parent_graph[comm.parent_id].append(comm.unique_id)
-
-    return news.comment.CommentStats(comments, parent_graph)
+    return comments
 
 
 
